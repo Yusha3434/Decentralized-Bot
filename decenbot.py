@@ -3,11 +3,28 @@ import sqlite3
 import os
 from telebot import types
 from datetime import datetime, timedelta
+from flask import Flask
+from threading import Thread
 
-# မင်းပေးထားတဲ့ Token အသစ်
+# Bot Token
 TOKEN = '8242602571:AAFfOR9SmP6T5cc_YWoKt0tmJXpOa7VbmP4'
 bot = telebot.TeleBot(TOKEN)
 
+# --- Flask Server for Render Port Binding ---
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is Running!"
+
+def run():
+    app.run(host='0.0.0.0', port=10000)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+# --- Database Functions ---
 def init_db():
     conn = sqlite3.connect('bot_users.db')
     cursor = conn.cursor()
@@ -36,6 +53,7 @@ def get_stats():
     conn.close()
     return total_users, monthly_users
 
+# --- Menu Design ---
 def main_menu():
     welcome_text = """
 <tg-emoji emoji-id="6238006042534353720">✨</tg-emoji> 👑 <b>Decentralized Store</b> 👑 <tg-emoji emoji-id="6238006042534353720">✨</tg-emoji>
@@ -129,4 +147,7 @@ Maung Maung
 
 if __name__ == "__main__":
     init_db()
+    keep_alive() # Start Flask server
+    print("Bot is starting...")
     bot.polling(none_stop=True)
+
